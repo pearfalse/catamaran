@@ -57,7 +57,7 @@ make_inter()
 
 	openssl ca -config openssl.cnf -in inter_${ICA_CODE}.csr \
 		-cert $ROOT_CA.pem -keyfile $ROOT_CA.key \
-		-extensions v3_ca -name CA_root \
+		-extensions v3_ca -name CA_{$ROOT_CA} -sha384 \
 		-out inter_${ICA_CODE}.pem -days 3650 \
 		-batch -passin stdin <<< "$CA_PASS"
 	set +x
