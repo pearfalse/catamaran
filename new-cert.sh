@@ -98,3 +98,5 @@ set +x
 # 	-CSP "Microsoft Enhanced RSA and AES Cryptographic Provider" \
 # 	-passout stdin -out "Keypair for $SITE_CN.pfx" <<< "$PKCS12_PASS"
 # echo "done (password is \`$PKCS12_PASS\`)"
+
+rm $REQPATH
