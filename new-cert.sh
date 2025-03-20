@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 # args: new-site.sh [CA to use [site domain [ecdsa|rsa]]]
 
@@ -75,7 +75,7 @@ subj O  "PFHome"
 echo -n "Creating certificate... "
 set -x
 MSYS2_ARG_CONV_EXCL="/CN" openssl req -config openssl.cnf \
-	-new \
+	-new -sha384 \
 	-key "$KEYPATH" -out "$REQPATH" \
 	-subj "$SUBJ" \
 	-extensions v3_req -addext 'subjectAltName=DNS:'"$SITE_CN" \
@@ -84,7 +84,7 @@ MSYS2_ARG_CONV_EXCL="/CN" openssl req -config openssl.cnf \
 CUR_SERIAL=$(cat ${CA_CODE}.db/serial)
 
 openssl ca -config openssl.cnf -in ${REQPATH} \
-	-cert $CA_CODE.pem -keyfile $CA_CODE.key \
+	-cert $CA_CODE.pem -keyfile $CA_CODE.key -md sha384 \
 	-extensions v3_ca -name CA_${CA_CODE} -days 730 \
 	-out "site_${SITE_CN}.pem" \
 	-batch -passin stdin <<< "$CA_PASS"

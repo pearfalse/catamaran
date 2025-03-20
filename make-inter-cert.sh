@@ -50,14 +50,14 @@ make_inter()
 	set -x
 	openssl req -config openssl.cnf -new \
 		-key inter_${ICA_CODE}.key -out inter_${ICA_CODE}.csr \
-		-subj "$SUBJ" \
+		-subj "$SUBJ" -sha384 \
 		"${_ext_arg[@]}" \
 		-passin stdin <<< "$INTER_PASS"
 
 
 	openssl ca -config openssl.cnf -in inter_${ICA_CODE}.csr \
-		-cert $ROOT_CA.pem -keyfile $ROOT_CA.key \
-		-extensions v3_ca -name CA_{$ROOT_CA} -sha384 \
+		-cert $ROOT_CA.pem -keyfile $ROOT_CA.key -md sha384 \
+		-extensions v3_ca -name CA_${ROOT_CA} \
 		-out inter_${ICA_CODE}.pem -days 3650 \
 		-batch -passin stdin <<< "$CA_PASS"
 	set +x
