@@ -25,7 +25,7 @@ openssl ec -in <(openssl ecparam -genkey -name secp384r1 -noout 2>/dev/null) \
 	-out "$CA".key -aes256 -passout stdin <<< "$CA_PASS"
 openssl ec -in "$CA".key -pubout -out "$CA".key.pub \
 	-passin stdin <<< "$CA_PASS"
-mkdir -p "$CA".db/{newcerts,crl}
+mkdir -p "$CA".db/{newcerts,crl,certs}
 touch "$CA".db/index
 echo 1000 > "$CA".db/serial
 
