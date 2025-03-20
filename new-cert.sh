@@ -44,18 +44,18 @@ if [[ -z "$CA_PASS" ]] ;then
 fi
 
 echo "generating private key... "
-if [[ "$3" == "ecdsa" ]] ;then
+if [[ "$3" == "rsa" ]] ;then
+	echo "Using an RSA keypair"
+	set -x
+	openssl genrsa -out $KEYPATH 4096
+	set +x
+else
 	echo "Using an ECDSA keypair"
 	set -x
 	openssl ec -in <(openssl ecparam -genkey -name secp384r1 -noout 2>/dev/null) \
 		-out "$KEYPATH" -aes256 -passout stdin <<< "$CA_PASS"
 	openssl ec -in "$KEYPATH" -pubout -out "$KEYPATH".pub \
 		-passin stdin <<< "$CA_PASS"
-	set +x
-else
-	echo "Using an RSA keypair"
-	set -x
-	openssl genrsa -out $KEYPATH 4096
 	set +x
 fi
 echo "done"
