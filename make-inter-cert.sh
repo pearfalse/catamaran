@@ -1,6 +1,8 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -e
 
 SUBJ=""
+if [[ -z "$ROOT_CA" ]] ;then ROOT_CA="ca" ;fi
+
 read -s -p "Enter root CA key password: " CA_PASS
 echo
 if [[ -z "$CA_PASS" ]] ;then
@@ -25,15 +27,10 @@ make_inter()
 		exit 127
 	fi
 
-	read -s -p "Enter *unique* password for the \`$1\` intermediate CA key: " INTER_PASS
+	read -s -p "Enter password for the \`$1\` intermediate CA key: " INTER_PASS
 	echo
 	if [[ -z "$INTER_PASS" ]] ;then
 		echo "no password entered; skipping"
-		return
-	fi
-	read -s -p "Confirm \`$1\` password: " INTER_PASS2
-	if [[ "$INTER_PASS2" != "$INTER_PASS" ]] ;then
-		echo "passwords do not match; skipping"
 		return
 	fi
 
@@ -50,29 +47,26 @@ make_inter()
 	if [[ -n "$CUSTOM_EXTENSION" ]] ;then
 		_ext_arg=( "-addext" "$CUSTOM_EXTENSION" )
 	fi
-
-	openssl genrsa -aes256 -passout stdin \
-		-out ca-inter-${ICA_CODE}.key 4096 <<< "$INTER_PASS"
-
-	openssl req -config PFHome.conf -new \
-		-key ca-inter-${ICA_CODE}.key -out ca-inter-${ICA_CODE}.csr \
+	set -x
+	openssl req -config openssl.cnf -new \
+		-key inter_${ICA_CODE}.key -out inter_${ICA_CODE}.csr \
 		-subj "$SUBJ" \
-		-extensions ca_self_ext \
 		"${_ext_arg[@]}" \
 		-passin stdin <<< "$INTER_PASS"
 
 
-	openssl ca -config PFHome.conf -in ca-inter-${ICA_CODE}.csr \
-		-cert ca.pem -keyfile ca.key \
-		-out ca-inter-${ICA_CODE}.pem -days 3650 \
-		-extensions ca_inter_ext \
-		-passin file:<(echo "$CA_PASS")
+	openssl ca -config openssl.cnf -in inter_${ICA_CODE}.csr \
+		-cert $ROOT_CA.pem -keyfile $ROOT_CA.key \
+		-extensions v3_ca -name CA_root \
+		-out inter_${ICA_CODE}.pem -days 3650 \
+		-batch -passin stdin <<< "$CA_PASS"
+	set +x
 }
 
 set -e
 
-CUSTOM_EXTENSION="nameConstraints = critical, permitted;DNS:.device.pf" \
-make_inter dev "PFHome Devices Intermediate Certificate Authority" "Upper Echelons"
+CUSTOM_EXTENSION="nameConstraints = critical, permitted;DNS:.pf" \
+make_inter services "PFHome Services Certificate Authority" "Upper Echelons"
 
-make_inter svc "PFHome Services Intermediate Certificate Authority" "Upper Echelons"
-make_inter phi "PFHome Second Root Certificate Authority" "Phantom Intermediary"
+CUSTOM_EXTENSION="nameConstraints = critical, permitted;DNS:.device.pf" \
+make_inter devices "PFHome Devices Certificate Authority" "Upper Echelons"

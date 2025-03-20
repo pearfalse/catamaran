@@ -1,7 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -e
 
-SUBJ=""
+SUBJ="$2"
+CA="${1:-ca}"
 
+if [[ -z "$2" ]] ;then
 subj()
 {
 	local escaped_value="$(echo -n "$2" | sed -re 's@\\@\\\\@g' -e 's@/@\\/@g')"
@@ -12,10 +14,11 @@ subj CN "PFHome Root Certificate Authority"
 subj OU "Upper Echelons"
 subj O  "PFHome"
 subj C  "GB"
+fi
 
 set -x
-exec openssl req -config PFHome.conf \
+exec openssl req -config openssl.cnf \
 	-x509 -new -days 3650 \
-	-key ca.key -out ca.pem \
-	-subj "$SUBJ" \
-	-extensions ca_self_ext
+	-key "$CA".key -out "$CA".pem \
+	-subj "$SUBJ" -extensions v3_ca \
+	-sha384
