@@ -48,9 +48,9 @@ Optionally, you can also set up intermediate certificate authorities with Catama
 The reasons why you, as a Catamaran user, would want to use an intermediate CA, is probably for one of these reasons:
 
 - Showing off. Doing it because you can.
-- Adding optional [name constraints](https://timothy-quinn.com/name-constraints-in-x509-certificates/), so that trusting your root CA is less risky (e.g. more difficult to make a local arbitrary certificate for your bank, and other no-nos. The above point about reducing exposure to the root CA key is also relevant here.
+- Adding optional [name constraints](https://timothy-quinn.com/name-constraints-in-x509-certificates/), so that trusting your root CA is less risky (e.g. more difficult to make a local arbitrary certificate for your bank, and other no-nos). The above point about reducing exposure to the root CA key is also relevant here.
 
-To generate data for intermediate CA, run `catamaran init-ca {CA ID}`. You will need to run this once per intermediate CA, so that you can always add more later.
+To generate data for an intermediate CA, run `catamaran init-ca {CA ID}`. You will need to run this once per intermediate CA, so that you can always add more later.
 
 **Warning**: Be careful when re-running `init-ca` for intermediate CAs. `openssl ca` doesn't let you generate a duplicate certificate for the same subject, and Catamaran may not 100% handle this case correctly. It will refuse to do anything if the intermediate CA folder already exists, but if you manually delete it, all bets are off. See _Remaking a certificate_ if you need to remake an intermediate CA.
 
@@ -75,7 +75,7 @@ Let's make some certificates for actual things now. `catamaran new-cert` makes a
 You will be prompted for the password of the signing CA's key. Running this will create the following files:
 
 - `site_{domain}.key`, which is the server's private key in PEM (plaintext) format. This file is unencrypted; you are encouraged to encrypt it in a way that makes sense for your application.
-- `{ca_id}.cadb/newcerts/{serial}.pem`, a signed certificate in PEM format. `openssl` will also add a human-readable dump of the certificate contents above the header; this is technically fully standards-compliant, but you may want to remove it. Catamaran will print out the exact path of this file.
+- `site_{domain}.pem`, a signed certificate in PEM format. `openssl` will also add a human-readable dump of the certificate contents above the header; this is technically fully standards-compliant, but you may want to remove it. Catamaran will print out the exact path of a second copy of this file, written into `openssl`'s own "database".
 
 # Remaking a certificate
 
