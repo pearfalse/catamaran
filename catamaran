@@ -1,0 +1,29 @@
+#!/usr/bin/env bash -e
+
+if [[ -z "$1" ]] ;then
+	echo "usage: $0 {subcommand} [subcommand arguments]" >&2
+	exit 1
+fi
+
+CATAMARAN_LIB=$(realpath "$(dirname "$0")")/lib
+
+if [[ "$1" == "help" || "$1" == "--help" || "$1" == "-h" ]] ;then
+	echo "supported subcommands:"
+	for SUBCMD_FILE in "$CATAMARAN_LIB"/*.exec.sh ;do
+		leaf="${SUBCMD_FILE##*/}"
+		echo "  ${leaf%.exec.sh}"
+	done
+	exit 0
+fi
+
+CATAMARAN_SUBCMD="$1"
+CATAMARAN_SUBCMD_FILE="$CATAMARAN_LIB/${1}.exec.sh"
+if [[ ! -e "$CATAMARAN_SUBCMD_FILE" ]] ;then
+	echo "error: subcommand '$1' not known" >&2
+	echo "note: run \`$0 help\` to see all supported subcommands" >&2
+	exit 1
+fi
+
+CATAMARAN_0="${0##*/}"
+shift 1
+source "$CATAMARAN_SUBCMD_FILE"
