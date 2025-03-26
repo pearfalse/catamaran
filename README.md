@@ -25,6 +25,7 @@ You will need to follow this section once.
 
 - Create a folder to hold your CA info, which this readme will refer to as the _database folder_. Do not make this a subfolder of the Catamaran scripts folder.
 - Copy `examples/catamaran.conf.sh` to your database folder (keep the name the same) and adjust it according to your needs.
+- Run `catamaran generate-openssl-config` to place an `openssl.cnf` file in your database folder. This reflects your Catamaran config, and you should re-run this command after every config change.
 
 I don't recommend manually changing `openssl.cnf` after it's created; this is an easy way to make load-bearing alterations that get accidentally lost forever.
 
@@ -39,8 +40,6 @@ You should follow this every time you open a shell to make data under your CA.
 # Creating certificate authorities
 
 Follow this to create the key, cert and data folder for each CA.
-
-First off, if you haven't already, run `catamaran generate-openssl-config` to place an `openssl.cnf` file in your database folder. This reflects your Catamaran config, and you should re-run this command after every config change.
 
 Run `catamaran init-ca` to create the root CA. This creates a file/folder structure under `<CA ID>.cadb` that `openssl ca` will be happy with. You'll be prompted for a password for encrypting the private key; use something **strong** and store it in a password manager. If `CATAMARAN_ROOT_CA[KEY_TYPE]` is set to `rsa`, it will make a 4096-bit RSA key with SHA-256 digest (slower, worse, but more compatible); if not, it will default to an ECDSA key on the secp384r1 curve with SHA-384 digest (faster, better, but less compatible with older systems). Consider that some systems [will reject](https://stackoverflow.com/a/47881232) certificates with ECDSA keys that are signed by certificate authoritites with RSA keys; I have seen this myself. The other way round is fine.
 
