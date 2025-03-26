@@ -1,5 +1,6 @@
 source "$CATAMARAN_LIB"/config.sh
 source "$CATAMARAN_LIB"/dn.sh
+source "$CATAMARAN_LIB"/cadb.sh
 
 if [[ "$1" == "-h" || "$1" == "--help" ]] ;then
 	echo "usage: $CATAMARAN_0 $CATAMARAN_SUBCMD {CA ID} {domain to sign for} [rsa]"
@@ -26,6 +27,13 @@ site_cn="$2"
 if [[ -z "$site_cn" ]] ;then
 	echo "error: no domain entered" >&2
 	exit 1
+fi
+
+# check cert doesn't seem to exist already
+if _catamaran_cn_found_in_index "$ca_id" "$site_cn" ;then
+	echo "error: CA '$ca_id' appears to have already made a certificate for $site_cn" >&2
+	echo "note: please remove this manually from the database first" >&2
+	exit 2
 fi
 
 key_path="site_${site_cn}.key"
