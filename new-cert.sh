@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# args: new-site.sh [CA to use [site domain [ecdsa|rsa]]]
+# args: new-site.sh [CA to use [site domain [rsa]]]
 
 SITE_CN="$2"
 if [[ -z "$SITE_CN" ]] ;then
@@ -13,7 +13,7 @@ fi
 
 CA_CODE="${1:-ca}"
 
-# i know this is restrictive; it's just here to catch mistakes
+# i know this is too restrictive; it's just here to catch mistakes
 # feel free to subvert it if you need to
 DNS_REGEX='^[A-Za-z]([A-Za-z0-9\-]*[A-Za-z0-9])?$'
 DNS_VALIDITY="$(echo -n "$SITE_CN" | (
@@ -33,7 +33,6 @@ fi
 
 KEYPATH="site_${SITE_CN}.key"
 REQPATH="otmp-${SITE_CN}.csr"
-CERTPATH="otmp-${SITE_CN}.pem"
 
 echo "Will sign against CA \`${CA_CODE}\`."
 read -s -p "Enter CA key password: " CA_PASS
@@ -52,10 +51,7 @@ if [[ "$3" == "rsa" ]] ;then
 else
 	echo "Using an ECDSA keypair"
 	set -x
-	openssl ec -in <(openssl ecparam -genkey -name secp384r1 -noout 2>/dev/null) \
-		-out "$KEYPATH" -aes256 -passout stdin <<< "$CA_PASS"
-	openssl ec -in "$KEYPATH" -pubout -out "$KEYPATH".pub \
-		-passin stdin <<< "$CA_PASS"
+	openssl ecparam -genkey -name secp384r1 -noout -out "$KEYPATH"
 	set +x
 fi
 echo "done"
@@ -70,6 +66,7 @@ subj()
 # keep this one first, or change MSYS2_ARG_CONV_EXCL= below in line with this
 subj CN "$SITE_CN"
 subj OU "A Website!"
+# This must match what you set in `make-ca-cert.sh`
 subj O  "PFHome"
 
 echo -n "Creating certificate... "
@@ -94,7 +91,7 @@ set +x
 # uncomment this for convenient import of local servers into a Windows cert store
 # echo -n "creating PKCS#12 file for import into system keychain: "
 # PKCS12_PASS="$(echo -n "$SITE_CN" | grep -oE '[^.]+$')"
-# openssl pkcs12 -export -in "$CERTPATH" -inkey "$KEYPATH" \
+# openssl pkcs12 -export -in "site_${SITE_CN}.pem" -inkey "$KEYPATH" \
 # 	-CSP "Microsoft Enhanced RSA and AES Cryptographic Provider" \
 # 	-passout stdin -out "Keypair for $SITE_CN.pfx" <<< "$PKCS12_PASS"
 # echo "done (password is \`$PKCS12_PASS\`)"

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash -e
 
+# Creates a self-signed cert for your root CA.
+
+# Run `make-ca-key.sh` before this.
+
 SUBJ="$2"
 CA="${1:-ca}"
 
@@ -10,10 +14,10 @@ subj()
 	SUBJ="$SUBJ/$1=${escaped_value}"
 }
 
+# Change this for your needs; be sure to change the `O` in `new-cert.sh` to match
 subj CN "PFHome Root Certificate Authority"
 subj OU "Upper Echelons"
 subj O  "PFHome"
-subj C  "GB"
 fi
 
 set -x

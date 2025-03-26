@@ -1,7 +1,19 @@
 #!/usr/bin/env bash -e
 
+# Args: [root CA ID, default 'ca']
+# Make intermediate certificate authorities. This is optional.
+
+# This makes the certs, not the keys; run `make-ca-key.sh` for each intermediate CA first.
+
+# To adjust for your needs, alter the `subj` calls below, as well as the `make_inter`
+# calls at the bottom of the script.
+
 SUBJ=""
-if [[ -z "$ROOT_CA" ]] ;then ROOT_CA="ca" ;fi
+if [[ -n "$1" ]] ;then
+	ROOT_CA="$1"
+else
+	ROOT_CA="ca"
+fi
 
 read -s -p "Enter root CA key password: " CA_PASS
 echo
@@ -36,10 +48,11 @@ make_inter()
 
 	ICA_CODE="$1"
 	SUBJ=""
+
+	# Change this for your needs; `O` must match that in `make-ca-cert.sh`
 	subj CN "$2"
 	subj OU "$3"
 	subj O  "PFHome"
-	subj C  "GB"
 
 	shift 3
 
@@ -64,6 +77,8 @@ make_inter()
 }
 
 set -e
+
+# Change as necessary
 
 CUSTOM_EXTENSION="nameConstraints = critical, permitted;DNS:.pf" \
 make_inter services "PFHome Services Certificate Authority" "Upper Echelons"
