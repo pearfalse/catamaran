@@ -62,7 +62,7 @@ Import any intermediate CA certificates you have (again, **not the keys**). For 
 
 If your system shows intermediate CAs as valid, this shows that your homegrown link in the system's trust chain is working.
 
-> Theoretically, you don't need to import an intermediate cert this way; the server in question for the leaf certificate will offer up its intermediates as well. However, as well as providing proof that things are working as intended, this also works around an issue you might have where server software does not let you specify a second certificate to include in the TLS handshake, so the system needs to know about it ahead of time. The [IPMI firmware](https://en.wikipedia.org/wiki/Intelligent_Platform_Management_Interface) on my NAS mainboard is one such case I have.
+> Theoretically, you don't need to import an intermediate cert this way; the server in question for the leaf certificate will offer up its intermediates as well. However, as well as providing proof that things are working as intended, this also works around an issue you might have where server software does not let you specify a second certificate to include in the TLS handshake, so the system needs to know about it ahead of time. For these certs, you'll need to make them directly off the root CA.
 
 # Creating leaf certificates
 
@@ -86,6 +86,9 @@ If you need to remake a certificate for whatever reason, you should manually rem
 - Delete the certificate's row in `index`.
 - Optionally, roll the index back by changing the contents in `serial`. Not recommended if you have already distributed certificates with rewound serial numbers anywhere.
 
+# Notes on platform support
+
+If you're using intermediate certificates, server software *must* be able to offer all intermediates for iOS' web stack to be happy with it. If it only offers the leaf cert, it refuses to let you visit the website _at all_, even if you manually import the intermediate cert (iOS will correctly link it to an already imported/trusted root cert, but not to the isolated server cert).
 
 # Not currently supported
 
