@@ -50,7 +50,7 @@ fi
 echo "generating private key... "
 if [[ "$3" == "rsa" || "${ca_data[KEY_TYPE]}" == "rsa" ]] ;then
 	echo "Using an RSA keypair"
-	openssl genrsa -out $key_path 4096
+	openssl genrsa -out $key_path 2048
 	cert_hash_type=sha256
 else
 	echo "Using an ECDSA keypair"
